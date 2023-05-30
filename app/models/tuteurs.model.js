@@ -2,12 +2,48 @@ const sql = require("./db.js");
 
 // constructor
 const Tuteur = function(tuteur) {
-  this.title = tuteur.title;
-  this.description = tuteur.description;
-  this.idcat = tuteur.idcat;
-  this.image = tuteur.image;
- 
+  this.prenom = tuteur.prenom;
+  this.nom = tuteur.nom;
+  this.email = tuteur.email;
+  this.bilographie = tuteur.bilographie;
+  this.typedetuteur = tuteur.typedetuteur;
+  this.languesparlees = tuteur.languesparlees;
+  this.motdepasse = tuteur.motdepasse;
+  
 };
+
+
+
+
+Tuteur.signup = (newTuteur, result) => {
+  // Vérifier si l'e-mail existe déjà
+  sql.query("SELECT * FROM tuteur WHERE email = ?", newTuteur.email, (err, res) => {
+    if (err) {
+      console.log("error: ", err);
+      result(err, null);
+      return;
+    }
+
+    if (res.length > 0) {
+      // L'e-mail existe déjà
+      result({ message: "L'e-mail existe déjà." }, null);
+      return;
+    }
+
+    // L'e-mail n'existe pas, insérer les données du tuteur
+    sql.query("INSERT INTO tuteur SET ?", newTuteur, (err, res) => {
+      if (err) {
+        console.log("error: ", err);
+        result(err, null);
+        return;
+      }
+
+      console.log("created tuteur: ", { id: res.insertId, ...newTuteur });
+      result(null, { id: res.insertId, ...newTuteur });
+    });
+  });
+};
+
 
 Tuteur.create = (newtuteur, result) => {
   sql.query("INSERT INTO tuteur SET ?", newtuteur, (err, res) => {
@@ -84,8 +120,8 @@ Tuteur.getAll = (title, result) => {
 
 Tuteur.updateById = (id, tuteur, result) => {
   sql.query(
-    "UPDATE tuteur SET title = ?, description = ?, published = ? WHERE id = ?",
-    [tuteur.title, tuteur.description, tuteur.published, id],
+    "UPDATE tuteur SET title = ?, nom = ?, published = ? WHERE id = ?",
+    [tuteur.title, tuteur.nom, tuteur.published, id],
     (err, res) => {
       if (err) {
         console.log("error: ", err);

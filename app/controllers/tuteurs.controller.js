@@ -1,6 +1,38 @@
 const Tuteur = require("../models/tuteurs.model.js");
 
 
+
+
+
+// Create and Save a new tuteur
+exports.signup = (req, res) => {
+  // Validate request
+  if (!req.body) {
+  res.status(400).send({
+  message: "Content can not be empty!"
+  });
+  }
+  
+  // Create a tuteur
+  const tuteur = new Tuteur({
+  nom: req.body.nom,
+  email: req.body.email,
+  typedetuteur: 'Tuteur communautaire',
+  motdepasse:req.body.motdepasse
+  });
+  
+  // Save Tuteur in the database
+  Tuteur.signup(tuteur, (err, data) => {
+  if (err)
+  res.status(500).send({
+  message:
+  err.message || "Some error occurred while creating the tuteur."
+  });
+  else res.send(data);
+  });
+  };
+
+
 // Create and Save a new tuteur
 exports.create = (req, res) => {
 // Validate request
@@ -12,10 +44,14 @@ message: "Content can not be empty!"
 
 // Create a tuteur
 const tuteur = new Tuteur({
-title: req.body.title,
-description: req.body.description,
-image: req.body.image,
-idcat: req.body.idcat
+prenom: req.body.prenom,
+nom: req.body.nom,
+email: req.body.email,
+bilographie: req.body.bilographie,
+typedetuteur: req.body.typedetuteur,
+languesparlees: req.body.languesparlees,
+motdepasse:motdepasse
+
 });
 
 // Save Tuteur in the database
