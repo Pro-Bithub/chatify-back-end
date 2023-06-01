@@ -8,6 +8,9 @@ module.exports = app => {
   
   router.post("/signup", tuteurs.signup);
 
+  router.post("/login", tuteurs.login);
+  router.post("/modify", tuteurs.modify);
+
   router.get("/", tuteurs.findAll);
   
 

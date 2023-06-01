@@ -44,6 +44,27 @@ Etudiant.signup = (newetudiant, result) => {
   });
 };
 
+Etudiant.findByEmail = (email, result) => {
+  sql.query("SELECT * FROM etudiant WHERE email = ?", [email], (err, res) => {
+    if (err) {
+      console.log("error: ", err);
+      result(err, null);
+      return;
+    }
+
+    if (res.length) {
+      console.log("found etudiant: ", res[0]);
+      result(null, res[0]);
+      return;
+    }
+
+    // Aucun étudiant trouvé avec l'email spécifié
+    result(null, null);
+  });
+};
+
+
+
 
 Etudiant.create = (newetudiant, result) => {
   sql.query("INSERT INTO etudiant SET ?", newetudiant, (err, res) => {
@@ -97,13 +118,12 @@ Etudiant.findById = (id, result) => {
   });
 };
 
-Etudiant.getAll = (title, result) => {
+
+
+Etudiant.getAll = (result) => {
   let query = "SELECT * FROM etudiant";
 
-  if (title) {
-    query += ` WHERE title LIKE '%${title}%'`;
-  }
-
+ 
   sql.query(query, (err, res) => {
     if (err) {
       console.log("error: ", err);
@@ -115,7 +135,6 @@ Etudiant.getAll = (title, result) => {
     result(null, res);
   });
 };
-
 
 
 Etudiant.updateById = (id, etudiant, result) => {

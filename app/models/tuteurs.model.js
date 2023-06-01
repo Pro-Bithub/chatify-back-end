@@ -2,6 +2,7 @@ const sql = require("./db.js");
 
 // constructor
 const Tuteur = function(tuteur) {
+  this.id = tuteur.id;
   this.prenom = tuteur.prenom;
   this.nom = tuteur.nom;
   this.email = tuteur.email;
@@ -9,7 +10,7 @@ const Tuteur = function(tuteur) {
   this.typedetuteur = tuteur.typedetuteur;
   this.languesparlees = tuteur.languesparlees;
   this.motdepasse = tuteur.motdepasse;
-  
+  this.pricePerHour = tuteur.pricePerHour;
 };
 
 
@@ -44,6 +45,24 @@ Tuteur.signup = (newTuteur, result) => {
   });
 };
 
+Tuteur.update = (tuteur, result) => {
+  sql.query(
+    "UPDATE tuteur SET nom = ?, prenom = ?, email = ?, bilographie = ?, typedetuteur = ?, languesparlees = ?, motdepasse = ?, pricePerHour = ? WHERE id = ?",
+    [tuteur.nom, tuteur.prenom, tuteur.email, tuteur.bilographie, tuteur.typedetuteur, tuteur.languesparlees, tuteur.motdepasse, tuteur.pricePerHour, tuteur.id],
+    (err, res) => {
+      if (err) {
+        console.log("error: ", err);
+        result(err, null);
+        return;
+      }
+
+      console.log("updated tuteur: ", { id: tuteur.id, ...tuteur });
+      result(null, { id: tuteur.id, ...tuteur });
+    }
+  );
+};
+
+
 
 Tuteur.create = (newtuteur, result) => {
   sql.query("INSERT INTO tuteur SET ?", newtuteur, (err, res) => {
@@ -57,6 +76,27 @@ Tuteur.create = (newtuteur, result) => {
     result(null, { id: res.insertId, ...newtuteur });
   });
 };
+
+Tuteur.findByEmail = (email, result) => {
+  sql.query("SELECT * FROM tuteur WHERE email = ?", [email], (err, res) => {
+    if (err) {
+      console.log("error: ", err);
+      result(err, null);
+      return;
+    }
+
+    if (res.length) {
+      console.log("found etudiant: ", res[0]);
+      result(null, res[0]);
+      return;
+    }
+
+    // Aucun étudiant trouvé avec l'email spécifié
+    result(null, null);
+  });
+};
+
+
 
 
 Tuteur.findOnebyidcat = (id, result) => {
@@ -97,13 +137,10 @@ Tuteur.findById = (id, result) => {
   });
 };
 
-Tuteur.getAll = (title, result) => {
+Tuteur.getAll = (result) => {
   let query = "SELECT * FROM tuteur";
 
-  if (title) {
-    query += ` WHERE title LIKE '%${title}%'`;
-  }
-
+ 
   sql.query(query, (err, res) => {
     if (err) {
       console.log("error: ", err);

@@ -30,21 +30,54 @@ exports.signup = async (req, res) => {
   }
 };
 
+exports.login = async (req, res) => {
+  try {
+    const { email, motdepasse } = req.body;
+
+    // Vérifier si l'email existe dans la base de données
+    Etudiant.findByEmail(email, async (err, etudiant) => {
+      if (err) {
+        res.status(500).json({ error: 'An error occurred' });
+        return;
+      }
+
+      if (!etudiant) {
+        res.status(404).json({ error: 'Etudiant not found' });
+        return;
+      }
+
+      // Vérifier si le mot de passe correspond
+      const passwordMatch = await bcrypt.compare(motdepasse, etudiant.motdepasse);
+
+      if (!passwordMatch) {
+        res.status(401).json({ error: 'Invalid password' });
+        return;
+      }
+
+   /*    // Créer un token d'authentification (vous pouvez utiliser une bibliothèque comme jsonwebtoken)
+      const token = createAuthToken(etudiant.id, etudiant.email); */
+
+      // Renvoyer le token et les informations de l'étudiant
+      res.send(etudiant);
+
+    });
+  } catch (error) {
+    console.error('Error logging in:', error);
+    res.status(500).json({ error: 'An error occurred' });
+  }
+};
 
 
 
 // Retrieve all etudiants from the database (with condition).
 exports.findAll = (req, res) => {
-const title = req.query.title;
-
-Etudiant.getAll(title, (err, data) => {
-if (err)
-res.status(500).send({
-message:
-err.message || "Some error occurred while retrieving etudiants."
-});
-else res.send(data);
-});
+  Etudiant.getAll((err, data) => {
+    if (err)
+      res.status(500).send({
+        message: err.message || "Some error occurred while retrieving Cours.",
+      });
+    else res.send(data);
+  });
 };
 
 // Find a single etudiant by Id
