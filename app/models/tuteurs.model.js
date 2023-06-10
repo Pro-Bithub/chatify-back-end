@@ -118,6 +118,141 @@ Tuteur.findOnebyidcat = (id, result) => {
   });
 };
 
+    
+
+
+Tuteur.saveTransaction = (etudiantId, idcours, tutorId, prix, date, iscours, result) => {
+  const newTransaction = { etudiantId, idcours, tutorId, prix, date, iscours };
+
+  sql.query("INSERT INTO transactions SET ?", newTransaction, (err, res) => {
+    if (err) {
+      console.log("error: ", err);
+      result(err, null);
+      return;
+    }
+
+    const transactionId = res.insertId;
+    console.log("created transaction: ", { id: transactionId, ...newTransaction });
+
+    const rendezVous = { etudiant_id: etudiantId, tutor_id: tutorId, date };
+    if (idcours&& idcours!=0) {
+      rendezVous.cour_id = idcours;
+    }
+    rendezVous.duree = 60;
+    rendezVous.statut = "En attente";
+    
+
+    sql.query("INSERT INTO rendez_vous SET ?", rendezVous, (err, res) => {
+      if (err) {
+        console.log("error: ", err);
+        result(err, null);
+        return;
+      }
+
+   
+
+      console.log("created favorite: ", { id: res.insertId, ...rendezVous });
+      result(null, { id: res.insertId, ...rendezVous });
+     
+    });
+  });
+};
+Tuteur.rendezvous = (etudiantId, result) => {
+  sql.query(`SELECT rendez_vous.*, tuteur.nom AS nom_tuteur
+              FROM rendez_vous
+              INNER JOIN tuteur ON rendez_vous.tutor_id = tuteur.id
+              WHERE rendez_vous.etudiant_id = ${etudiantId}`, (err, res) => {
+    if (err) {
+      console.log("error: ", err);
+      result(err, null);
+      return;
+    }
+
+    if (res.length) {
+      console.log("found rendez-vous: ", res[0]);
+      result(null, res);
+      return;
+    }
+
+    // no rendez-vous found for the given etudiantId
+    result({ kind: "not_found" }, null);
+  });
+};
+
+
+Tuteur.markAsFavorite = (tutorId, etudiantId, result) => {
+  const newFavorite = { tutorId, etudiantId };
+  sql.query("INSERT INTO Favorite SET ?", newFavorite, (err, res) => {
+    if (err) {
+      console.log("error: ", err);
+      result(err, null);
+      return;
+    }
+
+    console.log("created favorite: ", { id: res.insertId, ...newFavorite });
+    result(null, { id: res.insertId, ...newFavorite });
+  });
+};
+
+Tuteur.unmarkAsFavorite = (tutorId, etudiantId, result) => {
+  const sqlQuery = "DELETE FROM Favorite WHERE tutorId = ? AND etudiantId = ?";
+  sql.query(sqlQuery, [tutorId, etudiantId], (err, res) => {
+    if (err) {
+      console.log("Error unmarking tutor as favorite:", err);
+      result(err, null);
+      return;
+    }
+
+    console.log("Tutor unmarked as favorite:", { tutorId, etudiantId });
+    result(null, { tutorId, etudiantId });
+  });
+};
+
+
+Tuteur.getFavoritesByEtudiantId = (id, result) => {
+  sql.query(`SELECT * FROM Favorite WHERE etudiantId = ${id}`, (err, res) => {
+    if (err) {
+      console.log("error: ", err);
+      result(err, null);
+      return;
+    }
+
+    if (res.length) {
+
+      result(null, res);
+      return;
+    }
+
+    // not found tuteur with the id
+    result({ kind: "not_found" }, null);
+  });
+};
+
+Tuteur.getMyFavoritesByEtudiantId = (etudiantId, result) => {
+  const query = `
+    SELECT t.*
+    FROM Favorite f
+    JOIN Tuteur t ON t.id = f.tutorId
+    WHERE f.etudiantId = ?
+  `;
+  sql.query(query, etudiantId, (err, res) => {
+    if (err) {
+      console.log("error: ", err);
+      result(err, null);
+      return;
+    }
+
+    if (res.length) {
+      result(null, res);
+      return;
+    }
+
+    // No favorite tutors found for the etudiantId
+    result({ kind: "not_found" }, null);
+  });
+};
+
+
 Tuteur.findById = (id, result) => {
   sql.query(`SELECT * FROM tuteur WHERE id = ${id}`, (err, res) => {
     if (err) {

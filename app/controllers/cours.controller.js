@@ -85,9 +85,19 @@ exports.update = (req, res) => {
     });
   }
 
-  console.log(req.body);
+  const cour = new Cour({
+    titre: req.body.titre,
+    placesDisponibles: req.body.placesDisponibles,
+    langue: req.body.langue,
+    niveau: req.body.niveau,
+    duree: req.body.duree,
+    date: req.body.date,
+    description: req.body.description,
+    prix: req.body.prix,
+    horaire: req.body.horaire
+  });
 
-  Cour.updateById(req.params.id, new Cour(req.body), (err, data) => {
+  Cour.updateById(req.params.id, cour, (err, data) => {
     if (err) {
       if (err.kind === "not_found") {
         res.status(404).send({

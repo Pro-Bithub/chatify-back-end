@@ -11,12 +11,24 @@ module.exports = app => {
   router.post("/login", tuteurs.login);
   router.post("/modify", tuteurs.modify);
 
+  router.post("/save-transaction", tuteurs.saveTransaction);
+
   router.get("/", tuteurs.findAll);
   
-
+  router.get("/rendezvous/:etudiantId", tuteurs.rendezvous);
   
+// Mark tutor as favorite
+router.get("/mark-as-favorite", tuteurs.markAsFavorite);
+  // Unmark tutor as favorite
+router.delete("/unmark-as-favorite", tuteurs.unmarkAsFavorite);
+
   // Retrieve a single Product with id
   router.get("/:id", tuteurs.findOne);
+  router.get("/favorites/:etudiantId", tuteurs.getFavoritesByEtudiantId);
+
+  router.get("/myfavorites/:etudiantId", tuteurs.getMyFavoritesByEtudiantId);
+
+
   router.get("/byidcat/:id", tuteurs.findOnebyidcat);
   
   // Update a Product with id

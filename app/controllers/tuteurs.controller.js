@@ -176,6 +176,129 @@ exports.findAll = (req, res) => {
   });
 };
 
+
+// Save a transaction
+exports.saveTransaction = (req, res) => {
+  const { etudiantId, idcours, tutorId, prix, date, iscours } = req.body;
+
+
+  // Save the transaction in the database
+  Tuteur.saveTransaction(etudiantId, idcours, tutorId, prix, date, iscours,(err, data)  => {
+    if (err) {
+      res.status(500).send({
+        message: 'Failed to save transaction.',
+      });
+    } else {
+      res.send({
+        message: 'Transaction saved successfully.',
+        data,
+      });
+    }
+  });
+};
+
+
+// Find a single Tuteur by Id
+exports.rendezvous = (req, res) => {
+  Tuteur.rendezvous(req.params.etudiantId, (err, data) => {
+    if (err) {
+      if (err.kind === "not_found") {
+        res.status(404).send({
+          message: `Not found rendezvous with id ${req.params.etudiantId}.`,
+        });
+      } else {
+        res.status(500).send({
+          message: "Error retrieving rendezvous with etudiantId " + req.params.etudiantId,
+        });
+      }
+    } else res.send(data);
+  });
+};
+
+// Mark a tutor as favorite by tutorId and etudiantId
+exports.markAsFavorite = (req, res) => {
+  const { tutorId, etudiantId } = req.query;
+
+  // Logic to mark the tutor as a favorite by updating the tutor record in the database
+  // For example:
+  Tuteur.markAsFavorite(
+    tutorId,
+    etudiantId,
+    (err, data) => {
+      if (err) {
+        res.status(500).send({
+          message: "Error marking tutor as favorite.",
+        });
+      } else {
+        res.send({
+          message: "Tutor marked as favorite successfully.",
+          data,
+        });
+      }
+    }
+  );
+
+};
+
+exports.unmarkAsFavorite = (req, res) => {
+  const { tutorId, etudiantId } = req.query;
+
+  // Logic to unmark the tutor as a favorite by updating the tutor record in the database
+  // For example:
+  Tuteur.unmarkAsFavorite(
+    tutorId,
+    etudiantId,
+    (err, data) => {
+      if (err) {
+        res.status(500).send({
+          message: "Error unmarking tutor as favorite.",
+        });
+      } else {
+        res.send({
+          message: "Tutor unmarked as favorite successfully.",
+          data,
+        });
+      }
+    }
+  );
+};
+
+
+
+// Find a single Tuteur by Id
+exports.getFavoritesByEtudiantId = (req, res) => {
+  Tuteur.getFavoritesByEtudiantId(req.params.etudiantId, (err, data) => {
+    if (err) {
+      if (err.kind === "not_found") {
+        res.status(404).send({
+          message: `Not found Tuteur with etudiantId ${req.params.etudiantId}.`,
+        });
+      } else {
+        res.status(500).send({
+          message: "Error retrieving Tuteur with etudiantId " + req.params.etudiantId,
+        });
+      }
+    } else res.send(data);
+  });
+};
+
+exports.getMyFavoritesByEtudiantId = (req, res) => {
+  Tuteur.getMyFavoritesByEtudiantId(req.params.etudiantId, (err, data) => {
+    if (err) {
+      if (err.kind === "not_found") {
+        res.status(404).send({
+          message: `Not found Tuteur with etudiantId ${req.params.etudiantId}.`,
+        });
+      } else {
+        res.status(500).send({
+          message: "Error retrieving Tuteur with etudiantId " + req.params.etudiantId,
+        });
+      }
+    } else res.send(data);
+  });
+};
+
+
 // Find a single Tuteur by Id
 exports.findOne = (req, res) => {
   Tuteur.findById(req.params.id, (err, data) => {

@@ -113,9 +113,10 @@ Cour.getAll = (result) => {
 
 
 Cour.updateById = (id, cour, result) => {
+
   sql.query(
-    "UPDATE cour SET title = ?, nom = ?, published = ? WHERE id = ?",
-    [cour.title, cour.nom, cour.published, id],
+    "UPDATE cour SET titre = ?, places_disponibles = ?, langue = ?, niveau = ? , duree = ?  , date = ?  , description = ?  , prix = ?, horaire = ? WHERE id = ?",
+    [cour.titre, cour.placesDisponibles, cour.langue, cour.niveau, cour.duree, cour.date, cour.description, cour.prix, cour.horaire, id],
     (err, res) => {
       if (err) {
         console.log("error: ", err);

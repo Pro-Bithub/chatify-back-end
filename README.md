@@ -39,6 +39,38 @@ CREATE TABLE cour (
 );
 ALTER TABLE cour ADD COLUMN placesDisponibles INT;
 
+
+-- Create the Favorite table
+CREATE TABLE Favorite (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  tutorId INT,
+  etudiantId INT,
+  FOREIGN KEY (tutorId) REFERENCES Tuteur(id),
+  FOREIGN KEY (etudiantId) REFERENCES Etudiant(id)
+);
+
+CREATE TABLE transactions ( id INT PRIMARY KEY AUTO_INCREMENT, etudiantId INT NOT NULL, idcours INT, tutorId INT NOT NULL, prix DECIMAL(10, 2) NOT NULL, date DATE NOT NULL, iscours BOOLEAN NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, FOREIGN KEY (etudiantId) REFERENCES etudiant(id), FOREIGN KEY (tutorId) REFERENCES tuteur(id) );
+
+ALTER TABLE transactions
+MODIFY COLUMN date TIMESTAMP NOT NULL;
+
+
+CREATE TABLE rendez_vous (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  etudiant_id INT NOT NULL,
+  tutor_id INT NOT NULL,
+  cour_id INT,
+  date TIMESTAMP NOT NULL,
+  duree INT NOT NULL,
+  statut ENUM('En attente', 'Confirmé', 'Annulé') NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (etudiant_id) REFERENCES etudiant(id),
+  FOREIGN KEY (tutor_id) REFERENCES tuteur(id),
+  FOREIGN KEY (cour_id) REFERENCES cour(id)
+);
+
+
 -- Ajouter la colonne idtutor dans la table cour
 ALTER TABLE cour
 ADD idtutor INT;
