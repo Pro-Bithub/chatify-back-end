@@ -137,6 +137,16 @@ Tuteur.saveTransaction = (etudiantId, idcours, tutorId, prix, date, iscours, res
     const rendezVous = { etudiant_id: etudiantId, tutor_id: tutorId, date };
     if (idcours&& idcours!=0) {
       rendezVous.cour_id = idcours;
+      const updateQuery = `UPDATE cour SET placesDisponibles = placesDisponibles - 1 WHERE id = ${idcours}`;
+      sql.query(updateQuery, (error, result) => {
+        if (error) {
+          console.log('Error updating placesDisponibles:', error);
+          // Handle the error
+        } else {
+          console.log('Places disponibles updated successfully');
+          // Handle the successful update
+        }
+      });
     }
     rendezVous.duree = 60;
     rendezVous.statut = "En attente";
@@ -177,6 +187,52 @@ Tuteur.rendezvous = (etudiantId, result) => {
     // no rendez-vous found for the given etudiantId
     result({ kind: "not_found" }, null);
   });
+};
+Tuteur.appointments = (tutorId, result) => {
+  sql.query(`SELECT rendez_vous.*, etudiant.nom AS nom_etudiant
+              FROM rendez_vous
+              INNER JOIN etudiant ON rendez_vous.etudiant_id = etudiant.id
+              WHERE rendez_vous.tutor_id = ${tutorId}`, (err, res) => {
+    if (err) {
+      console.log("error: ", err);
+      result(err, null);
+      return;
+    }
+
+    if (res.length) {
+      console.log("found rendez-vous: ", res[0]);
+      result(null, res);
+      return;
+    }
+
+    // no rendez-vous found for the given etudiantId
+    result({ kind: "not_found" }, null);
+  });
+};
+
+
+
+Tuteur.accepterRendezVous = (id, msg, result) => {
+  sql.query(
+    "UPDATE rendez_vous SET statut = ? WHERE id = ?",
+    [msg, id],
+    (err, res) => {
+      if (err) {
+        console.log("error: ", err);
+        result(err, null);
+        return;
+      }
+
+      if (res.affectedRows == 0) {
+        // No rendez-vous found with the given id
+        result({ kind: "not_found" }, null);
+        return;
+      }
+
+      console.log("Updated rendez-vous: ", { id: id, statut: msg });
+      result(null, { id: id, statut: msg });
+    }
+  );
 };
 
 
@@ -288,7 +344,23 @@ Tuteur.getAll = (result) => {
   });
 };
 
+Tuteur.gettransactions = (result) => {
+  let query = "SELECT transactions.*, etudiant.nom AS nom_etudiant, tuteur.nom AS nom_tuteur FROM transactions JOIN etudiant ON transactions.etudiantId = etudiant.id JOIN tuteur ON transactions.tutorId = tuteur.id; ";
+  
+  
 
+ 
+  sql.query(query, (err, res) => {
+    if (err) {
+      console.log("error: ", err);
+      result(null, err);
+      return;
+    }
+
+    console.log("tuteurs: ", res);
+    result(null, res);
+  });
+};
 
 Tuteur.updateById = (id, tuteur, result) => {
   sql.query(

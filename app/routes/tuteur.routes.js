@@ -16,11 +16,19 @@ module.exports = app => {
   router.get("/", tuteurs.findAll);
   
   router.get("/rendezvous/:etudiantId", tuteurs.rendezvous);
-  
+  router.get("/appointments/:tutorId", tuteurs.appointments);
+
+  router.get("/appointments-accept/:id", tuteurs.accepterRendezVous);
+  router.get("/appointments-refuse/:id", tuteurs.refuserRendezVous);
+  router.get("/get/transactions", tuteurs.gettransactions);
+
 // Mark tutor as favorite
 router.get("/mark-as-favorite", tuteurs.markAsFavorite);
   // Unmark tutor as favorite
 router.delete("/unmark-as-favorite", tuteurs.unmarkAsFavorite);
+
+
+
 
   // Retrieve a single Product with id
   router.get("/:id", tuteurs.findOne);

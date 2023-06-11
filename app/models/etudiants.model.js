@@ -161,23 +161,81 @@ Etudiant.updateById = (id, etudiant, result) => {
 };
 
 Etudiant.remove = (id, result) => {
-  sql.query("DELETE FROM etudiant WHERE id = ?", id, (err, res) => {
-    if (err) {
-      console.log("error: ", err);
-      result(null, err);
-      return;
-    }
+  // Delete associated rows in the favorite table first
+  const deleteFavorites = new Promise((resolve, reject) => {
+    sql.query("DELETE FROM favorite WHERE etudiantId = ?", id, (err, res) => {
+      if (err) {
+        console.log("Error deleting favorites:", err);
+        reject(err);
+      } else {
+        console.log("Deleted favorites for etudiant with id:", id);
+        resolve();
+      }
+    });
+  });
+  const deleteRendezVous = new Promise((resolve, reject) => {
+    sql.query("DELETE FROM rendez_vous WHERE etudiant_id = ?", id, (err, res) => {
+      if (err) {
+        console.log("Error deleting rendez_vous:", err);
+        reject(err);
+      } else {
+        console.log("Deleted rendez_vous for etudiant with id:", id);
+        resolve();
+      }
+    });
+  });
 
-    if (res.affectedRows == 0) {
-      // not found etudiant with the id
-      result({ kind: "not_found" }, null);
-      return;
-    }
+  const deleteTransactions = new Promise((resolve, reject) => {
+    sql.query("DELETE FROM transactions WHERE etudiantId = ?", id, (err, res) => {
+      if (err) {
+        console.log("Error deleting transactions:", err);
+        reject(err);
+      } else {
+        console.log("Deleted transactions for etudiant with id:", id);
+        resolve();
+      }
+    });
+  });
 
-    console.log("deleted etudiant with id: ", id);
-    result(null, res);
+
+  // After deleting favorites, delete the etudiant row
+  deleteFavorites.then(() => {
+            deleteRendezVous.then(() => {
+
+              deleteRendezVous.then(() => {
+                  sql.query("DELETE FROM etudiant WHERE id = ?", id, (err, res) => {
+                    if (err) {
+                      console.log("Error deleting etudiant:", err);
+                      result(null, err);
+                      return;
+                    }
+
+                    if (res.affectedRows == 0) {
+                      // Not found etudiant with the id
+                      result({ kind: "not_found" }, null);
+                      return;
+                    }
+
+                    console.log("Deleted etudiant with id:", id);
+                    result(null, res);
+                  });
+                }).catch((err) => {
+                  // Handle any errors that occurred during the deletion process
+                  console.log("Error deleting associated favorites:", err);
+                  result(err, null);
+                });
+          }).catch((err) => {
+            // Handle any errors that occurred during the deletion process
+            console.log("Error deleting associated favorites:", err);
+            result(err, null);
+          });
+  }).catch((err) => {
+    // Handle any errors that occurred during the deletion process
+    console.log("Error deleting associated favorites:", err);
+    result(err, null);
   });
 };
+
 
 Etudiant.removeAll = result => {
   sql.query("DELETE FROM etudiant", (err, res) => {

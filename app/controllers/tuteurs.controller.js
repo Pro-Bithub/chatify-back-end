@@ -165,6 +165,17 @@ exports.create = (req, res) => {
   });
 };
 
+
+exports.gettransactions = (req, res) => {
+  Tuteur.gettransactions((err, data) => {
+    if (err)
+      res.status(500).send({
+        message: err.message || "Some error occurred while retrieving Tuteurs.",
+      });
+    else res.send(data);
+  });
+};
+
 // Retrieve all tuteurs from the database (with condition).
 exports.findAll = (req, res) => {
   Tuteur.getAll((err, data) => {
@@ -214,6 +225,57 @@ exports.rendezvous = (req, res) => {
     } else res.send(data);
   });
 };
+exports.appointments = (req, res) => {
+  Tuteur.appointments(req.params.tutorId, (err, data) => {
+    if (err) {
+      if (err.kind === "not_found") {
+        res.status(404).send({
+          message: `Not found rendezvous with id ${req.params.tutorId}.`,
+        });
+      } else {
+        res.status(500).send({
+          message: "Error retrieving rendezvous with tutorId " + req.params.tutorId,
+        });
+      }
+    } else res.send(data);
+  });
+};
+exports.accepterRendezVous = (req, res) => {
+  Tuteur.accepterRendezVous(req.params.id,"Confirmé", (err, data) => {
+    if (err) {
+      if (err.kind === "not_found") {
+        res.status(404).send({
+          message: `Not found accepterRendezVous with id ${req.params.id}.`,
+        });
+      } else {
+        res.status(500).send({
+          message: "Error retrieving accepterRendezVous with id " + req.params.id,
+        });
+      }
+    } else res.send(data);
+  });
+};
+
+
+exports.refuserRendezVous = (req, res) => {
+  Tuteur.accepterRendezVous(req.params.id,"Annulé", (err, data) => {
+    if (err) {
+      if (err.kind === "not_found") {
+        res.status(404).send({
+          message: `Not found accepterRendezVous with id ${req.params.id}.`,
+        });
+      } else {
+        res.status(500).send({
+          message: "Error retrieving accepterRendezVous with id " + req.params.id,
+        });
+      }
+    } else res.send(data);
+  });
+};
+
+
+
+
 
 // Mark a tutor as favorite by tutorId and etudiantId
 exports.markAsFavorite = (req, res) => {
