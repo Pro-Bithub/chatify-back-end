@@ -95,7 +95,9 @@ Cour.findById = (id, result) => {
 };
 
 Cour.getAll = (result) => {
-  let query = "SELECT * FROM cour";
+  let query = "SELECT cour.*, tuteur.prenom  , tuteur.nom FROM cour JOIN tuteur ON cour.idtutor = tuteur.id  ";
+  
+
 
  
   sql.query(query, (err, res) => {

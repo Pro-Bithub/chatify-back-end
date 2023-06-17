@@ -2,6 +2,7 @@ const sql = require("./db.js");
 
 // constructor 
 const Etudiant = function(etudiant) {
+  this.id = etudiant.id;
   this.prenom = etudiant.prenom;
   this.nom = etudiant.nom;
   this.email = etudiant.email;
@@ -118,6 +119,22 @@ Etudiant.findById = (id, result) => {
   });
 };
 
+Etudiant.update = (etudiant, result) => {
+  sql.query(
+    "UPDATE etudiant SET nom = ?, prenom = ?, email = ?, date_naissance = ?, adresse = ?, motdepasse = ?, telephone = ? WHERE id = ?",
+    [etudiant.nom, etudiant.prenom, etudiant.email, etudiant.date_naissance, etudiant.adresse, etudiant.motdepasse, etudiant.telephone, etudiant.id],
+    (err, res) => {
+      if (err) {
+        console.log("error: ", err);
+        result(err, null);
+        return;
+      }
+
+      console.log("updated etudiant: ", { id: etudiant.id, ...etudiant });
+      result(null, { id: etudiant.id, ...etudiant });
+    }
+  );
+};
 
 
 Etudiant.getAll = (result) => {

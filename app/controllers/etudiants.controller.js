@@ -130,6 +130,69 @@ message: "Error updating Tuteur with id " + req.params.id
 );
 };
 
+exports.modify = async (req, res) => {
+  // Validate request
+  if (!req.body) {
+    res.status(400).send({
+      message: "Content can not be empty!",
+    });
+  }
+  try {
+    const { ancienemail, motdepasse, nouveaumotdepasse } = req.body;
+
+    // Vérifier si l'email existe dans la base de données
+    Etudiant.findByEmail(ancienemail, async (err, etudiant) => {
+      if (err) {
+        res.status(500).json({ error: "An error occurred" });
+        return;
+      }
+      console.log("updated etudiant: ", etudiant);
+      if (!etudiant) {
+        res.status(404).json({ error: "etudiant not found" });
+        return;
+      }
+
+      // Vérifier si le mot de passe correspond
+      const passwordMatch = await bcrypt.compare(motdepasse, etudiant.motdepasse);
+
+      if (!passwordMatch) {
+        res.status(401).json({ error: "Invalid password" });
+        return;
+      }
+      const Password = etudiant.motdepasse;
+      if (nouveaumotdepasse != null && nouveaumotdepasse != "")
+        Password = await bcrypt.hash(nouveaumotdepasse, 10);
+
+      // Create a etudiant
+      const netudiant = new Etudiant({
+        id: etudiant.id,
+        nom: req.body.nom,
+        prenom: req.body.prenom,
+        email: req.body.email,
+        date_naissance: req.body.date_naissance,
+        adresse: req.body.adresse,
+        motdepasse: Password,
+        telephone: req.body.telephone,
+      });
+
+
+      // modify etudiant in the database
+      Etudiant.update(netudiant, (err, data) => {
+        if (err)
+          res.status(500).send({
+            message:
+              err.message || "Some error occurred while creating the etudiant.",
+          });
+        else res.send(data);
+      });
+    });
+  } catch (error) {
+    console.error("Error logging in:", error);
+    res.status(500).json({ error: "An error occurred" });
+  }
+};
+
+
 // Delete a Tuteur with the specified id in the request
 exports.delete = (req, res) => {
   Etudiant.remove(req.params.id, (err, data) => {

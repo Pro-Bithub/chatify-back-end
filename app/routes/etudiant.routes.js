@@ -14,7 +14,7 @@ module.exports = app => {
   router.get("/", etudiants.findAll);
   
 
-  
+  router.post("/modify", etudiants.modify);
   // Retrieve a single Product with id
   router.get("/:id", etudiants.findOne);
 
